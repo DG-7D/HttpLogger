@@ -25,13 +25,14 @@ git clone https://github.com/DG-7D/HttpLogger.git
 bun start
 ```
 
-`http://localhost:3000/?param1=value1&param2=value2`のようにリクエストを送ると、`param1,param2`をヘッダとした`./_csv/yyyyMMddHHmmss.csv`が生成され、`value1,value2`が記録されます。同じパラメータ(順番は問わない)でアクセスすると、同じファイルに追記されます。パラメータの組み合わせが変わると新しいファイルが作成されます。
+`http://localhost:3000/log?param1=value1&param2=value2`のようにリクエストを送ると、`param1,param2`をヘッダとした`./_csv/yyyyMMddHHmmss.csv`(時刻はUTC)が生成され、`value1,value2`が記録されます。同じパラメータ(順番は問わない)でアクセスすると、同じファイルに追記されます。パラメータの組み合わせが変わるか、`/new`が呼ばれた後は新しいファイルが作成されます。
 
 StormworksのLuaスクリプトであれば以下のようにしてデータを送信できます。
 
 ```lua
 tick = 0
 ready = true
+async.httpGet(3000, "/new")
 
 function httpReply()
 	ready = true
@@ -42,7 +43,7 @@ function onTick()
     value2 = input.getNumber(2)
 	if ready then
 		ready = false
-		async.httpGet(3000, "/?tick="..tick .. "&param1="..value1 .. "&param2="..value2)
+		async.httpGet(3000, "/log?tick="..tick .. "&param1="..value1 .. "&param2="..value2)
 	end
 	tick = tick + 1
 end

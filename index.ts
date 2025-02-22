@@ -17,16 +17,22 @@ function writeLog(data: string) {
 }
 
 const server = Bun.serve({
+    // TODO: Bun v1.2.3がきたらroutsを使う
     fetch: (request) => {
-        const params = new URL(request.url).searchParams;
-        if ([...params.keys()].length !== keys.length || !keys.every(key => params.has(key))) {
-            keys = [...params.keys()];
-            openNewLog();
-            writeLog(keys.join(",") + "\n");
+        const url = new URL(request.url);
+        if (url.pathname === "/new") {
+            keys = [];
+        } else if (url.pathname === "/log") {
+            const params = url.searchParams;
+            if ([...params.keys()].length !== keys.length || !keys.every(key => params.has(key))) {
+                keys = [...params.keys()];
+                openNewLog();
+                writeLog(keys.join(",") + "\n");
+            }
+            writeLog(
+                keys.map(key => params.get(key) ?? "").join(",") + "\n"
+            );
         }
-        writeLog(
-            keys.map(key => params.get(key) ?? "").join(",") + "\n"
-        );
         return new Response();
     },
 });
