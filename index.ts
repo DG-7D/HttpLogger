@@ -17,7 +17,7 @@ function writeLog(data: string) {
 }
 
 const server = Bun.serve({
-    fetch(request) {
+    fetch: (request) => {
         const params = new URL(request.url).searchParams;
         if ([...params.keys()].length !== keys.length || !keys.every(key => params.has(key))) {
             keys = [...params.keys()];
