@@ -17,13 +17,13 @@ function writeLog(data: string) {
 }
 
 const server = Bun.serve({
-    // TODO: Bun v1.2.3がきたらroutsを使う
-    fetch: (request) => {
-        const url = new URL(request.url);
-        if (url.pathname === "/new") {
+    routes: {
+        "/new": () => {
             keys = [];
-        } else if (url.pathname === "/log") {
-            const params = url.searchParams;
+            return new Response();
+        },
+        "/log": (request) => {
+            const params = new URL(request.url).searchParams;
             if ([...params.keys()].length !== keys.length || !keys.every(key => params.has(key))) {
                 keys = [...params.keys()];
                 openNewLog();
@@ -32,9 +32,10 @@ const server = Bun.serve({
             writeLog(
                 keys.map(key => params.get(key) ?? "").join(",") + "\n"
             );
-        }
-        return new Response();
+            return new Response();
+        },
     },
+    fetch: () => new Response("Not Found", { status: 404 }),
 });
 
 console.log("Listening on " + server.url);
